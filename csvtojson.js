@@ -72,28 +72,3 @@ generateJSON(function(err, content){
     console.log('The file has been saved successfully.')
   })
 })
-
-
-
-
-
-
-
-
-// const filePath = './countrycodes.csv'
-// const csv = require('csvtojson')
-
-// const converter = {
-//     includeColumns: /(CountryCode|Name)/
-// }
-
-// csv(converter)
-//   .fromFile(filePath)
-//   .on('header',(header)=>{
-//     //header=> [header1, header2, header3]
-//     header => ['one','two']
-//     console.log(header)
-//     })
-//   .then((jsonObj) => {
-//     console.log(jsonObj);
-// })
