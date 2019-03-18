@@ -16,53 +16,46 @@ function generateFileName(filePath) {
 }
 
 const generateJSON = (callback) => {
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err)  return console.log(err)
+  fs.readFile(filePath, 'utf8', (err, data) => {
     
-        const dataSplit = data.split('\r\n')
-        const header = dataSplit[0].split(',')
-        const body = dataSplit.slice(1).map(e => e.split(/,"|",|,(?=\S)/g)) // Ensure we split only on commars surrounded by non-whitespace characters. Some country names have a comma
+  const dataSplit = data.split('\r\n')
+  const header = dataSplit[0].split(',')
+  const body = dataSplit.slice(1).map(e => e.split(/,"|",|,(?=\S)/g)) // Ensure we split only on commars surrounded by non-whitespace characters. Some country names have a comma
         
-        // return the names of the columns we want to target - user provided via args
-        const targetColumns = columns.map(col => col.split('=')[0])
-        const newColumnValuesObj = columns.map(column => ({
-            [column.split('=')[0]]: column.split('=')[1]
-        }))
+  // return the names of the columns we want to target - user provided via args
+  const targetColumns = columns.map(col => col.split('=')[0])
+  
+  const newColumnValuesObj = columns.map(column => ({
+    [column.split('=')[0]]: column.split('=')[1]
+  }))
         
-        // index locations of target columns in csv header array
-        const targetColumnIndexes = targetColumns.map(h => {
-          if (header.indexOf(h) == -1) {
-            throw new Error(`Target Column Name not found in CSV header column: ${h}`)
-          }
-          return header.indexOf(h)
-        })
+  // index locations of target columns in csv header array
+  const targetColumnIndexes = targetColumns.map(h => {
+    if (header.indexOf(h) == -1) {
+      throw new Error(`Target Column Name not found in CSV header column: ${h}`)
+    }
+    return header.indexOf(h)
+  })
 
-        const renamedColumnHeaders = header
-          .filter(h => targetColumns.indexOf(h) != -1) // return only the columns specified
-          .map((h, i) => {
-              return newColumnValuesObj[i][h]
-          }) // map to new column names
+  const renamedColumnHeaders = header
+    .filter(h => targetColumns.indexOf(h) != -1) // return only the columns specified
+    .map((h, i) => {
+      return newColumnValuesObj[i][h]
+    }) // map to new column names
 
-        // transform the body
-        const transformedBody = body
-          .map(c => c.filter((el, i) => targetColumnIndexes.indexOf(i) != -1))
+    // transform the body
+    const transformedBody = body
+      .map(c => c.filter((el, i) => targetColumnIndexes.indexOf(i) != -1))
         
-        const output = JSON.stringify(transformedBody.map((a, i) => {
-          const objToReturn = {}
-          a.map((b, i) => objToReturn[renamedColumnHeaders[i]] = b)
-          return objToReturn
-            
-        }))
+    const output = JSON.stringify(transformedBody.map((a, i) => {
+      const objToReturn = {}
+      a.map((b, i) => objToReturn[renamedColumnHeaders[i]] = b)
+      return objToReturn      
+    }))
 
-        callback(err, output)
-    })
+    callback(err, output)
+  })
 }
-
-/* todo:
-Error handling on:
- -- Incorrect target column name
-*/
-
 
 generateJSON(function(err, content){ 
   if (err) return err
